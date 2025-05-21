@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // Backend/routes/faceRoutes.js
 const express = require('express');
 const router = express.Router();
@@ -56,5 +57,13 @@ router.post('/recognize-face', upload.single('image'), async (req, res) => {
     res.status(500).json({ message: 'Face recognition failed.' });
   }
 });
+=======
+const express = require('express');
+const router = express.Router();
+const { recognizeFace } = require('../controllers/Location/Face_recog');  // Import the recognizeFace function
+
+// Route for face recognition
+router.post('/', recognizeFace);
+>>>>>>> 9d890557948ec86881d0ff455694522052894642
 
 module.exports = router;

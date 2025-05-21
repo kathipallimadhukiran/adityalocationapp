@@ -32,7 +32,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes
 app.use('/', getrouters);  // Location routes
+<<<<<<< HEAD
 app.use('/api/faces', faceRecognitionRoutes);  // Face recognition routes
+=======
+app.use('/face-recognition', faceRecognitionRoutes);  // Face recognition routes
+>>>>>>> 9d890557948ec86881d0ff455694522052894642
 app.use('/login', loginRoutes);  // Login routes
 
 app.get('/test', (req, res) => {

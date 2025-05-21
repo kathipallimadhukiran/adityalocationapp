@@ -4,7 +4,11 @@ import joblib
 import numpy as np
 import pandas as pd
 from datetime import date, datetime
+<<<<<<< HEAD
 from flask import Flask, request, render_template, redirect, url_for, jsonify
+=======
+from flask import Flask, request, render_template, redirect, url_for
+>>>>>>> 9d890557948ec86881d0ff455694522052894642
 from sklearn.neighbors import KNeighborsClassifier
 
 # Flask App Initialization
@@ -87,6 +91,7 @@ def index():
     return render_template('index.html', names=names, rolls=rolls, times=times, l=l,
                            totalreg=totalreg(), datetoday2=datetoday2)
 
+<<<<<<< HEAD
 @app.route('/upload', methods=['POST'])
 def upload():
     """
@@ -160,6 +165,87 @@ def add():
     train_model()
     return jsonify({'message': f'Successfully added {saved_count} images for {newusername}_{newuserid}'})
 
+=======
+@app.route('/start')
+def start():
+    """Start the face recognition and attendance marking."""
+    if 'face_recognition_model.pkl' not in os.listdir('static'):
+        return render_template('index.html', totalreg=totalreg(), datetoday2=datetoday2,
+                               mess='No trained model found. Please add a new face to continue.')
+
+    cap = cv2.VideoCapture(0)
+    attended_users = set()
+
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        faces = extract_faces(frame)
+        for (x, y, w, h) in faces:
+            face = cv2.resize(frame[y:y + h, x:x + w], (50, 50))
+            identified_person = identify_face(face.reshape(1, -1))[0]
+
+            if identified_person not in attended_users:
+                add_attendance(identified_person)
+                attended_users.add(identified_person)
+
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            cv2.putText(frame, identified_person, (x, y - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 20), 2)
+
+        cv2.imshow('Attendance Check', frame)
+        if cv2.waitKey(1) & 0xFF == 27:  # ESC key
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+    names, rolls, times, l = extract_attendance()
+    return render_template('navbar_logout.html', names=names, rolls=rolls,
+                           times=times, l=l, totalreg=totalreg(), datetoday2=datetoday2)
+
+@app.route('/add', methods=['POST'])
+def add():
+    """Add a new user (train the model with new face)."""
+    newusername = request.form['newusername']
+    newuserid = request.form['newuserid']
+    user_dir = f'static/faces/{newusername}_{newuserid}'
+
+    if not os.path.exists(user_dir):
+        os.makedirs(user_dir)
+
+    cap = cv2.VideoCapture(0)
+    i, j = 0, 0
+
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            continue
+
+        faces = extract_faces(frame)
+        for (x, y, w, h) in faces:
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 20), 2)
+            cv2.putText(frame, f'Images Captured: {i}/50', (30, 30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 20), 2)
+
+            if j % 10 == 0 and i < 50:
+                face_img = frame[y:y + h, x:x + w]
+                cv2.imwrite(f'{user_dir}/{newusername}_{i}.jpg', face_img)
+                i += 1
+            j += 1
+
+        if i >= 50 or cv2.waitKey(1) & 0xFF == 27:  # ESC key
+            break
+
+        cv2.imshow('Adding New User', frame)
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+    train_model()
+    return redirect(url_for('index'))
+>>>>>>> 9d890557948ec86881d0ff455694522052894642
 
 # ---------------- Main Entry Point ---------------- #
 
